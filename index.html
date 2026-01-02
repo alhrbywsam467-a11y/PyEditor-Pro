@@ -1,118 +1,71 @@
-<!DOCTYPE html><html><head><style>body {
-    margin: 0;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    background: #1a1a1a;
-    color: white;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-header {
-    background: #2d2d2d;
-    padding: 15px 25px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 2px solid #ffd43b;
-}
-
-.logo { font-weight: bold; font-size: 20px; color: #ffd43b; }
-
-.container { display: flex; flex: 1; overflow: hidden; }
-
-#editor {
-    flex: 1;
-    background: #1e1e1e;
-    color: #9cdcfe;
-    padding: 20px;
-    font-family: 'Consolas', monospace;
-    font-size: 16px;
-    border: none;
-    outline: none;
-    resize: none;
-}
-
-#preview {
-    flex: 1;
-    background: white;
-    display: flex;
-    flex-direction: column;
-}
-
-.preview-bar {
-    background: #eee;
-    color: #333;
-    padding: 5px 15px;
-    font-size: 12px;
-    border-bottom: 1px solid #ccc;
-}
-
-#display { flex: 1; padding: 25px; color: black; overflow-y: auto; }
-
-#run-btn {
-    background: #3776ab;
-    color: white;
-    border: none;
-    padding: 10px 25px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-#run-btn:hover { background: #ffd43b; color: #222; }</style></head><body><!DOCTYPE html>
+<!DOCTYPE html><html><head><style>body { margin: 0; height: 100vh; display: flex; flex-direction: column; background: #1e1e1e; font-family: sans-serif; }
+header { background: #333; padding: 10px; display: flex; align-items: center; gap: 10px; }
+.search-box { flex: 1; display: flex; }
+#search-in { flex: 1; padding: 8px; background: #444; color: white; border: none; }
+.main { display: flex; flex: 1; }
+#editor-wrapper { flex: 1; position: relative; }
+#editor { position: absolute; top: 0; right: 0; bottom: 0; left: 0; font-size: 16px; }
+#preview-section { flex: 1; background: white; color: black; padding: 20px; overflow-y: auto; }
+#run-btn { background: #28a745; color: white; border: none; padding: 10px 20px; cursor: pointer; }</style></head><body><!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>تيتان - محرر بايثون</title>
+    <title>TITAN - المحرر المتوافق</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.12.0/brython.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.12.0/brython_stdlib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.2/ace.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body onload="brython()">
 
-    <header>
-        <div class="logo">TITAN EDITOR ⚡</div>
-        <button id="run-btn">تشغيل الكود فوراً ▶</button>
-    </header>
+<header>
+    <div class="brand">TITAN JS-PY 🚀</div>
+    <div class="search-box">
+        <input type="text" id="search-in" placeholder="ابحث هنا...">
+        <button id="search-go">بحث</button>
+    </div>
+    <button id="run-btn">تشغيل ▶</button>
+</header>
 
-    <main class="container">
-        <textarea id="editor" spellcheck="false">
-from browser import document, html
-print("المحرك اشتغل!")
-document["display"] <= html.H1("تم الربط بنجاح!")
-        </textarea>
+<div class="main">
+    <div id="editor-wrapper">
+        <div id="editor">from browser import document, html
 
-        <div id="preview">
-            <div id="display"></div>
-        </div>
-    </main>
+def test():
+    document['preview'] <= html.H2("اشتغل غصب!")
+    document['preview'] <= html.P("هذا الكود يعمل حتى لو المحرك لا يدعم بايثون")
 
-    <script type="text/python" id="logic_engine">
-from browser import document, window
+test()</div>
+    </div>
+    <div id="preview-section">
+        <div id="preview"></div>
+    </div>
+</div>
 
-def execute_now():
-    document["display"].html = ""
-    user_code = document["editor"].value
+<script src="script.js"></script>
+
+<script type="text/python">
+from browser import document, window, html
+
+def execute_code(ev):
+    document["preview"].html = ""
+    user_code = window.editor.getValue()
     try:
         exec(user_code)
     except Exception as e:
-        document["display"].html = f"<p style='color:red'>{e}</p>"
+        document["preview"].html = f"<b style='color:red'>{e}</b>"
 
-window.run_python_now = execute_now
-    </script>
+def search(ev):
+    val = document["search-in"].value
+    document["preview"].html = f"<h3>نتائج البحث عن: {val}</h3>"
 
-    <script src="script.js"></script>
+document["run-btn"].bind("click", execute_code)
+document["search-go"].bind("click", search)
+</script>
+
 </body>
-</html><script>document.getElementById('run-btn').addEventListener('click', function() {
-    // التحقق المباشر من وجود الدالة في نافذة المتصفح
-    if (typeof window.run_python_now === 'function') {
-        window.run_python_now();
-    } else {
-        // إذا لم يحمل بعد، نجبر المتصفح على محاولة التشغيل مرة أخرى
-        console.log("جاري تفعيل المحرك...");
-        setTimeout(() => {
-            if (window.run_python_now) window.run_python_now();
-        }, 500);
-    }
-});</script></body></html>
+</html><script>// تفعيل المحرر
+var editor = ace.edit("editor");
+editor.setTheme("ace/theme/monokai");
+editor.session.setMode("ace/mode/python");
+window.editor = editor; // ربط المحرر بالبايثون</script></body></html>
