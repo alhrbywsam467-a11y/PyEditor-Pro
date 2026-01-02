@@ -1,75 +1,118 @@
-<!DOCTYPE html><html><head><style></style></head><body><!DOCTYPE html>
+<!DOCTYPE html><html><head><style>body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #1a1a1a;
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+header {
+    background: #2d2d2d;
+    padding: 15px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #ffd43b;
+}
+
+.logo { font-weight: bold; font-size: 20px; color: #ffd43b; }
+
+.container { display: flex; flex: 1; overflow: hidden; }
+
+#editor {
+    flex: 1;
+    background: #1e1e1e;
+    color: #9cdcfe;
+    padding: 20px;
+    font-family: 'Consolas', monospace;
+    font-size: 16px;
+    border: none;
+    outline: none;
+    resize: none;
+}
+
+#preview {
+    flex: 1;
+    background: white;
+    display: flex;
+    flex-direction: column;
+}
+
+.preview-bar {
+    background: #eee;
+    color: #333;
+    padding: 5px 15px;
+    font-size: 12px;
+    border-bottom: 1px solid #ccc;
+}
+
+#display { flex: 1; padding: 25px; color: black; overflow-y: auto; }
+
+#run-btn {
+    background: #3776ab;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#run-btn:hover { background: #ffd43b; color: #222; }</style></head><body><!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>محرر بايثون للمتصفح</title>
+    <title>تيتان - محرر بايثون</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.12.0/brython.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.12.0/brython_stdlib.min.js"></script>
-    <style>
-        :root { --main-bg: #1a1a1a; --header-bg: #333; --accent: #ffd43b; }
-        body { margin: 0; display: flex; flex-direction: column; height: 100vh; font-family: sans-serif; background: var(--main-bg); color: white; }
-        header { background: var(--header-bg); padding: 15px; border-bottom: 2px solid var(--accent); display: flex; justify-content: space-between; align-items: center; }
-        .container { display: flex; flex: 1; overflow: hidden; }
-        #editor { flex: 1; background: #252526; color: #9cdcfe; padding: 20px; font-family: monospace; border: none; font-size: 16px; outline: none; resize: none; }
-        #browser-preview { flex: 1; background: white; border-right: 2px solid var(--accent); position: relative; }
-        .preview-header { background: #eee; color: #333; padding: 5px 15px; font-size: 12px; border-bottom: 1px solid #ccc; display: flex; align-items: center; }
-        #display { width: 100%; height: 100%; padding: 20px; color: black; overflow-y: auto; }
-        .run-btn { background: #3776ab; color: white; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .run-btn:hover { background: #ffd43b; color: #333; }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body onload="brython()">
 
-<header>
-    <div style="font-weight: bold; color: var(--accent);">🐍 PYTHON TO BROWSER ENGINE</div>
-    <button class="run-btn" onclick="document.getElementById('run_trigger').click()">تشغيل في المتصفح ▶</button>
-</header>
+    <header>
+        <div class="logo">TITAN EDITOR ⚡</div>
+        <button id="run-btn">تشغيل الكود فوراً ▶</button>
+    </header>
 
-<div class="container">
-    <textarea id="editor" placeholder="اكتب كود بايثون هنا...">from browser import document, html
+    <main class="container">
+        <textarea id="editor" spellcheck="false">
+from browser import document, html
+print("المحرك اشتغل!")
+document["display"] <= html.H1("تم الربط بنجاح!")
+        </textarea>
 
-# إنشاء عنوان داخل المتصفح
-header = html.H1("أهلاً بك في متصفح بايثون")
-header.style = {"color": "#3776ab", "text-align": "center"}
-
-# إضافة نص
-text = html.P("هذا النص تم إنشاؤه بواسطة كود بايثون حقيقي!")
-
-# إضافة زر
-btn = html.BUTTON("اضغط هنا")
-btn.bind("click", lambda ev: document.select("#display")[0].append(html.P("تم الضغط!")))
-
-# عرض العناصر في شاشة المعاينة
-document["display"] <= header
-document["display"] <= text
-document["display"] <= btn
-    </textarea>
-
-    <div id="browser-preview">
-        <div class="preview-header">
-            <span style="background: #ccc; padding: 2px 10px; border-radius: 10px; margin-left: 10px;">http://localhost:python-live</span>
-            <span>🌐 معاينة المتصفح</span>
+        <div id="preview">
+            <div id="display"></div>
         </div>
-        <div id="display"></div>
-    </div>
-</div>
+    </main>
 
-<button id="run_trigger" style="display:none;"></button>
-
-<script type="text/python" id="script_holder">
+    <script type="text/python" id="logic_engine">
 from browser import document, window
 
-def run_python(ev):
-    document["display"].html = "" # مسح المعاينة القديمة
-    code = document["editor"].value
+def execute_now():
+    document["display"].html = ""
+    user_code = document["editor"].value
     try:
-        exec(code)
+        exec(user_code)
     except Exception as e:
-        document["display"].html = f"<b style='color:red'>خطأ في الكود: {e}</b>"
+        document["display"].html = f"<p style='color:red'>{e}</p>"
 
-document["run_trigger"].bind("click", run_python)
-</script>
+window.run_python_now = execute_now
+    </script>
 
+    <script src="script.js"></script>
 </body>
-</html><script></script></body></html>
+</html><script>document.getElementById('run-btn').addEventListener('click', function() {
+    // التحقق المباشر من وجود الدالة في نافذة المتصفح
+    if (typeof window.run_python_now === 'function') {
+        window.run_python_now();
+    } else {
+        // إذا لم يحمل بعد، نجبر المتصفح على محاولة التشغيل مرة أخرى
+        console.log("جاري تفعيل المحرك...");
+        setTimeout(() => {
+            if (window.run_python_now) window.run_python_now();
+        }, 500);
+    }
+});</script></body></html>
